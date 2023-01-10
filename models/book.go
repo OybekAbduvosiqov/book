@@ -20,9 +20,27 @@ type Book struct {
 	CreatedAt   string  `json:"created_at"`
 	UpdatedAt   string  `json:"updated_at"`
 }
+type BookC struct {
+	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Description string  `json:"description"`
+	Categorys   []CategoryName
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+type CategoryName struct {
+	Id   string `json:"id"`
+	Name string `json:"Category"`
+}
 
 type UpdateBook struct {
 	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Description string  `json:"description"`
+}
+type UpdateBookId struct {
 	Name        string  `json:"name"`
 	Price       float64 `json:"price"`
 	Description string  `json:"description"`
@@ -34,6 +52,9 @@ type GetListBookRequest struct {
 }
 
 type GetListBookResponse struct {
-	Count int64  `json:"count"`
-	Books []Book `json:"books"`
+	Count     int64      `json:"count"`
+	Books     []Book     `json:"books"`
+	Categorys []Category `json:"categorys"`
 }
+
+type Empty struct{}

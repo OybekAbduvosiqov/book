@@ -5,16 +5,35 @@ type CategoryPrimeryKey struct {
 }
 
 type CreateCategory struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type Category struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type CategoryB struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	BookInfos []BookInfo
+}
+type BookInfo struct {
+	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Description string  `json:"description"`
 }
 
 type UpdateCategory struct {
 	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+type UpdateCategoryId struct {
 	Name string `json:"name"`
 }
 

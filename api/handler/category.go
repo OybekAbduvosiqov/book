@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,6 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateCategory godoc
+// @ID create_category
+// @Router /category [POST]
+// @Summary Create Category
+// @Description Create Category
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param category body models.CreateCategory true "CreateCategoryRequestBody"
+// @Success 201 {object} models.Category "GetCategoryBody"
+// @Response 400 {object} string "Invalid Argumant"
+// @Failure 500 {object} string "Server error"
 func (h *Handler) CreateCategory(c *gin.Context) {
 
 	var category models.CreateCategory
@@ -39,20 +52,45 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, res)
 }
 
-func (h *Handler) GetByIDCategory(c *gin.Context) {
+// GetByIDCategory godoc
+// @ID get_by_id_category
+// @Router /category/{id} [GET]
+// @Summary Get By ID Category
+// @Description Get By ID Category
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 200 {object} models.Category "GetCategoryBody"
+// @Response 400 {object} string "Invalid Argumant"
+// @Failure 500 {object} string "Server error"
+func (h *Handler) GetByIdCategory(c *gin.Context) {
 
 	id := c.Param("id")
 
 	res, err := storage.GetByIdCategory(h.db, models.CategoryPrimeryKey{Id: id})
 	if err != nil {
-		log.Println("error whiling get by id category:", err.Error())
+		log.Println("error whiling get by id book:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, res)
+	c.JSON(http.StatusOK, res)
 }
 
+// GetListCategory godoc
+// @ID get_list_category
+// @Router /category [GET]
+// @Summary Get List Category
+// @Description Get List Category
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param offset query int false "offset"
+// @Param limit query int false "limit"
+// @Success 200 {object} models.GetListCategoryResponse "GetCategoryListBody"
+// @Response 400 {object} string "Invalid Argumant"
+// @Failure 500 {object} string "Server error"
 func (h *Handler) GetListCategory(c *gin.Context) {
 	var (
 		err       error
@@ -92,4 +130,82 @@ func (h *Handler) GetListCategory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, res)
+}
+
+// UpdateCategory godoc
+// @ID update_category
+// @Router /category/{id} [PUT]
+// @Summary Update Category
+// @Description Update Category
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Param category body models.UpdateCategoryId true "UpdateCategoryRequestBody"
+// @Success 202 {object} models.Category "UpdateCategoryBody"
+// @Response 400 {object} string "Invalid Argumant"
+// @Failure 500 {object} string "Server error"
+func (h *Handler) UpdateCategory(c *gin.Context) {
+
+	var (
+		category models.UpdateCategory
+	)
+
+	category.Id = c.Param("id")
+
+	err := c.ShouldBindJSON(&category)
+	if err != nil {
+		log.Printf("error whiling update: %v\n", err)
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	rowsAffected, err := storage.UpdateCategory(h.db, category)
+	if err != nil {
+		log.Printf("error whiling update: %v", err)
+		c.JSON(http.StatusInternalServerError, errors.New("error whiling update").Error())
+		return
+	}
+
+	if rowsAffected == 0 {
+		log.Printf("error whiling update rows affected: %v", err)
+		c.JSON(http.StatusInternalServerError, errors.New("error whiling update rows affected").Error())
+		return
+	}
+
+	resp, err := storage.GetByIdCategory(h.db, models.CategoryPrimeryKey{
+		Id: category.Id,
+	})
+	if err != nil {
+		log.Printf("error whiling get by id: %v\n", err)
+		c.JSON(http.StatusInternalServerError, errors.New("error whiling get by id").Error())
+		return
+	}
+
+	c.JSON(http.StatusAccepted, resp)
+}
+
+// DeleteCategory godoc
+// @ID delete_category
+// @Router /category/{id} [DELETE]
+// @Summary Delete Category
+// @Description Delete Category
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Success 204 {object} models.Empty "DeleteCategoryBody"
+// @Response 400 {object} string "Invalid Argumant"
+// @Failure 500 {object} string "Server error"
+func (h *Handler) DeleteCategory(c *gin.Context) {
+
+	id := c.Param("id")
+
+	err := storage.DeleteCategory(h.db, models.CategoryPrimeryKey{Id: id})
+	if err != nil {
+		log.Println("error whiling delete  category:", err.Error())
+		c.JSON(http.StatusNoContent, err.Error())
+		return
+	}
+	c.JSON(http.StatusNoContent, "delete category")
 }

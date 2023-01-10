@@ -3,9 +3,10 @@ package storage
 import (
 	"database/sql"
 	"fmt"
-	"github.com/OybekAbduvosiqov/book/models"
 
 	"github.com/google/uuid"
+
+	"github.com/OybekAbduvosiqov/book/models"
 )
 
 func InsertBook(db *sql.DB, book models.CreateBook) (string, error) {
@@ -38,37 +39,61 @@ func InsertBook(db *sql.DB, book models.CreateBook) (string, error) {
 	return id, nil
 }
 
-func GetByIdBook(db *sql.DB, req models.BookPrimeryKey) (models.Book, error) {
+func GetByIdBook(db *sql.DB, req models.BookPrimeryKey) (models.BookC, error) {
 
 	var (
-		book models.Book
+		book models.BookC
 	)
 
 	query := `
-		SELECT
-			id,
-			name,
-			price,
-			description,
-			created_at,
-			updated_at
-		FROM books WHERE id = $1
+			select
+				books.id,
+				books.name,
+				books.price,
+				books.description,
+				books.updated_at,
+				books.created_at
+			from book_category
+			join books on books.id = book_category.books_id
+			where book_category.categorys_id = $1
+			group by books.name, books.id
 	`
-
-	err := db.QueryRow(query, req.Id).Scan(
-		&book.Id,
-		&book.Name,
-		&book.Price,
-		&book.Description,
-		&book.CreatedAt,
-		&book.UpdatedAt,
-	)
-
+	query1 := `select
+			categorys.id,
+			categorys.name,
+			from book_category
+			join categorys on categorys.id = book_category.categorys_id
+			where bc.books_id = $1`
+	rows, err := db.Query(query, req.Id)
 	if err != nil {
-		return models.Book{}, err
+		return models.BookC{}, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(
+			&book.Id,
+			&book.Name,
+			&book.Price,
+			&book.Description,
+			&book.UpdatedAt,
+			&book.CreatedAt,
+		)
+		rows, err = db.Query(query1, req.Id)
+		for rows.Next() {
+			var c1 models.CategoryName
+			err = rows.Scan(
+				&c1.Id,
+				&c1.Name,
+			)
+			book.Categorys = append(book.Categorys, c1)
+		}
+	}
+	if err != nil {
+		return models.BookC{}, err
 	}
 
 	return book, nil
+
 }
 
 func GetListBook(db *sql.DB, req models.GetListBookRequest) (models.GetListBookResponse, error) {
@@ -129,20 +154,20 @@ func GetListBook(db *sql.DB, req models.GetListBookRequest) (models.GetListBookR
 	return resp, nil
 }
 
-func UpdateBook(db *sql.DB, book models.UpdateBook) error {
+func UpdateBook(db *sql.DB, book models.UpdateBook) (int64, error) {
 
 	query := `
-		UPDATE 
-			books 
-		SET 
-			name = $2,
-			price = $3,
-			description = $4,
-			updated_at = now()
-		WHERE id = $1
-	`
+	UPDATE 
+		books 
+	SET 
+		name = $2,
+		price = $3,
+		description = $4,
+		updated_at = now()
+	WHERE id = $1
+`
 
-	_, err := db.Exec(query,
+	result, err := db.Exec(query,
 		book.Id,
 		book.Name,
 		book.Price,
@@ -150,14 +175,19 @@ func UpdateBook(db *sql.DB, book models.UpdateBook) error {
 	)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }
 
-func DeleteBook(db *sql.DB, id models.BookPrimeryKey) error {
-	_, err := db.Exec("DELETE FROM books WHERE id = $1", id)
+func DeleteBook(db *sql.DB, req models.BookPrimeryKey) error {
+	_, err := db.Exec("DELETE FROM books WHERE id = $1", req.Id)
 
 	if err != nil {
 		return err

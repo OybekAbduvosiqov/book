@@ -7,9 +7,10 @@ import (
 	"strconv"
 
 	"github.com/OybekAbduvosiqov/book/models"
-	"github.com/OybekAbduvosiqov/book/storage"
 
 	"github.com/gin-gonic/gin"
+
+	"context"
 )
 
 // CreateCategory godoc
@@ -35,14 +36,16 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	id, err := storage.InsertCategory(h.db, category)
+	id, err := h.storage.Category().Insert(context.Background(), &category)
 	if err != nil {
 		log.Println("error whiling create category:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	res, err := storage.GetByIdCategory(h.db, models.CategoryPrimeryKey{Id: id})
+	res, err := h.storage.Category().GetByID(context.Background(), &models.CategoryPrimeryKey{
+		Id: id,
+	})
 	if err != nil {
 		log.Println("error whiling get by id category:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
@@ -68,9 +71,11 @@ func (h *Handler) GetByIdCategory(c *gin.Context) {
 
 	id := c.Param("id")
 
-	res, err := storage.GetByIdCategory(h.db, models.CategoryPrimeryKey{Id: id})
+	res, err := h.storage.Category().GetByID(context.Background(), &models.CategoryPrimeryKey{
+		Id: id,
+	})
 	if err != nil {
-		log.Println("error whiling get by id book:", err.Error())
+		log.Println("error whiling get by id category:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -118,7 +123,7 @@ func (h *Handler) GetListCategory(c *gin.Context) {
 		}
 	}
 
-	res, err := storage.GetListCategory(h.db, models.GetListCategoryRequest{
+	res, err := h.storage.Category().GetList(context.Background(), &models.GetListCategoryRequest{
 		Offset: int64(offset),
 		Limit:  int64(limit),
 	})
@@ -141,7 +146,7 @@ func (h *Handler) GetListCategory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param category body models.UpdateCategoryId true "UpdateCategoryRequestBody"
+// @Param category body models.UpdateCategorySwag true "UpdateCategoryRequestBody"
 // @Success 202 {object} models.Category "UpdateCategoryBody"
 // @Response 400 {object} string "Invalid Argumant"
 // @Failure 500 {object} string "Server error"
@@ -151,7 +156,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		category models.UpdateCategory
 	)
 
-	category.Id = c.Param("id")
+	id := c.Param("id")
 
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
@@ -160,21 +165,18 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	rowsAffected, err := storage.UpdateCategory(h.db, category)
+	err = h.storage.Category().Update(context.Background(), &models.UpdateCategory{
+		Id:   id,
+		Name: category.Name,
+	})
 	if err != nil {
 		log.Printf("error whiling update: %v", err)
 		c.JSON(http.StatusInternalServerError, errors.New("error whiling update").Error())
 		return
 	}
 
-	if rowsAffected == 0 {
-		log.Printf("error whiling update rows affected: %v", err)
-		c.JSON(http.StatusInternalServerError, errors.New("error whiling update rows affected").Error())
-		return
-	}
-
-	resp, err := storage.GetByIdCategory(h.db, models.CategoryPrimeryKey{
-		Id: category.Id,
+	resp, err := h.storage.Category().GetByID(context.Background(), &models.CategoryPrimeryKey{
+		Id: id,
 	})
 	if err != nil {
 		log.Printf("error whiling get by id: %v\n", err)
@@ -201,11 +203,20 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 
 	id := c.Param("id")
 
-	err := storage.DeleteCategory(h.db, models.CategoryPrimeryKey{Id: id})
+	err := h.storage.Category().Delete(context.Background(), &models.CategoryPrimeryKey{Id: id})
 	if err != nil {
 		log.Println("error whiling delete  category:", err.Error())
 		c.JSON(http.StatusNoContent, err.Error())
 		return
 	}
-	c.JSON(http.StatusNoContent, "delete category")
+	// resp, err := h.storage.Category().GetByID(context.Background(),&models.CategoryPrimeryKey{
+	// 	Id: id,
+	// })
+	// if err != nil {
+	// 	log.Printf("error whiling get by id: %v\n", err)
+	// 	c.JSON(http.StatusInternalServerError, errors.New("error whiling get by id").Error())
+	// 	return
+	// }
+
+	c.JSON(http.StatusNoContent, "Deletet Category")
 }

@@ -1,15 +1,16 @@
 package handler
 
 import (
-	"errors"
+	"context"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/OybekAbduvosiqov/book/models"
-	"github.com/OybekAbduvosiqov/book/storage"
 
 	"github.com/gin-gonic/gin"
+
+	"errors"
+	"strconv"
 )
 
 // CreateBook godoc
@@ -35,21 +36,23 @@ func (h *Handler) CreateBook(c *gin.Context) {
 		return
 	}
 
-	id, err := storage.InsertBook(h.db, book)
+	id, err := h.storage.Book().Insert(context.Background(), &book)
 	if err != nil {
 		log.Println("error whiling create book:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	res, err := storage.GetByIdBook(h.db, models.BookPrimeryKey{Id: id})
+	resp, err := h.storage.Book().GetByID(context.Background(), &models.BookPrimeryKey{
+		Id: id,
+	})
 	if err != nil {
 		log.Println("error whiling get by id book:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, res)
+	c.JSON(http.StatusCreated, resp)
 }
 
 // GetByIDBook godoc
@@ -68,7 +71,10 @@ func (h *Handler) GetByIDBook(c *gin.Context) {
 
 	id := c.Param("id")
 
-	res, err := storage.GetByIdBook(h.db, models.BookPrimeryKey{Id: id})
+	res, err := h.storage.Book().GetByID(context.Background(), &models.BookPrimeryKey{
+		Id: id,
+	})
+
 	if err != nil {
 		log.Println("error whiling get by id book:", err.Error())
 		c.JSON(http.StatusInternalServerError, err.Error())
@@ -118,7 +124,7 @@ func (h *Handler) GetListBook(c *gin.Context) {
 		}
 	}
 
-	res, err := storage.GetListBook(h.db, models.GetListBookRequest{
+	res, err := h.storage.Book().GetList(context.Background(), &models.GetListBookRequest{
 		Offset: int64(offset),
 		Limit:  int64(limit),
 	})
@@ -141,7 +147,7 @@ func (h *Handler) GetListBook(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param book body models.UpdateBookId true "UpdateBookRequestBody"
+// @Param book body models.UpdateBookSwag true "UpdateBookRequestBody"
 // @Success 202 {object} models.Book "UpdateBookBody"
 // @Response 400 {object} string "Invalid Argumant"
 // @Failure 500 {object} string "Server error"
@@ -160,28 +166,30 @@ func (h *Handler) UpdateBook(c *gin.Context) {
 		return
 	}
 
-	rowsAffected, err := storage.UpdateBook(h.db, book)
+	err = h.storage.Book().Update(context.Background(), &models.UpdateBook{
+		Id:          book.Id,
+		Name:        book.Name,
+		Price:       book.Price,
+		Description: book.Description,
+	})
 	if err != nil {
-		log.Printf("error whiling update: %v", err)
+		log.Printf("error whiling update 2: %v", err)
 		c.JSON(http.StatusInternalServerError, errors.New("error whiling update").Error())
 		return
 	}
 
-	if rowsAffected == 0 {
-		log.Printf("error whiling update rows affected: %v", err)
-		c.JSON(http.StatusInternalServerError, errors.New("error whiling update rows affected").Error())
-		return
-	}
+	// if rowsAffected == 0 {
+	// 	log.Printf("error whiling update rows affected: %v", err)
+	// 	c.JSON(http.StatusInternalServerError, errors.New("error whiling update rows affected").Error())
+	// 	return
+	// }
 
-	resp, err := storage.GetByIdBook(h.db, models.BookPrimeryKey{
-		Id: book.Id,
-	})
+	resp, err := h.storage.Book().GetByID(context.Background(), &models.BookPrimeryKey{Id: book.Id})
 	if err != nil {
 		log.Printf("error whiling get by id: %v\n", err)
 		c.JSON(http.StatusInternalServerError, errors.New("error whiling get by id").Error())
 		return
 	}
-
 	c.JSON(http.StatusAccepted, resp)
 }
 
@@ -200,7 +208,7 @@ func (h *Handler) UpdateBook(c *gin.Context) {
 func (h *Handler) DeleteBook(c *gin.Context) {
 	id := c.Param("id")
 
-	err := storage.DeleteBook(h.db, models.BookPrimeryKey{Id: id})
+	err := h.storage.Category().Delete(context.Background(), &models.CategoryPrimeryKey{Id: id})
 	if err != nil {
 		log.Println("error whiling delete  book:", err.Error())
 		c.JSON(http.StatusNoContent, err.Error())

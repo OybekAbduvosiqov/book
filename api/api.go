@@ -1,8 +1,9 @@
 package api
 
 import (
-	"database/sql"
+	// "database/sql"
 
+	"github.com/OybekAbduvosiqov/book/storage"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -12,15 +13,15 @@ import (
 	"github.com/OybekAbduvosiqov/book/api/handler"
 )
 
-func NewApi(r *gin.Engine, db *sql.DB) {
+func NewApi(r *gin.Engine, storage storage.StorageI) {
 
-	handlerV1 := handler.NewHandler(db)
+	handlerV1 := handler.NewHandler(storage)
 
 	r.POST("/book", handlerV1.CreateBook)
 	r.GET("/book/:id", handlerV1.GetByIDBook)
 	r.GET("/book", handlerV1.GetListBook)
-	r.DELETE("/book/:id", handlerV1.DeleteBook)
 	r.PUT("/book/:id", handlerV1.UpdateBook)
+	r.DELETE("/book/:id", handlerV1.DeleteBook)
 
 	r.POST("/category", handlerV1.CreateCategory)
 	r.GET("/category/:id", handlerV1.GetByIdCategory)

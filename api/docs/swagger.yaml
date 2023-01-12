@@ -1,6 +1,10 @@
 definitions:
   models.Book:
     properties:
+      categories:
+        items:
+          $ref: '#/definitions/models.Category1'
+        type: array
       created_at:
         type: string
       description:
@@ -16,6 +20,10 @@ definitions:
     type: object
   models.Category:
     properties:
+      categories:
+        items:
+          $ref: '#/definitions/models.CategoryBook'
+        type: array
       created_at:
         type: string
       id:
@@ -25,11 +33,24 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.CreateBook:
+  models.Category1:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CategoryBook:
     properties:
       created_at:
         type: string
       description:
+        type: string
+      id:
         type: string
       name:
         type: string
@@ -38,13 +59,26 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.CreateCategory:
+  models.CreateBook:
     properties:
-      created_at:
+      category_ids:
+        items:
+          type: string
+        type: array
+      description:
         type: string
       name:
         type: string
-      updated_at:
+      price:
+        type: number
+    type: object
+  models.CreateCategory:
+    properties:
+      books_id:
+        items:
+          type: string
+        type: array
+      name:
         type: string
     type: object
   models.Empty:
@@ -53,21 +87,32 @@ definitions:
     properties:
       books:
         items:
-          $ref: '#/definitions/models.Book'
+          $ref: '#/definitions/models.UpdateBook'
         type: array
       count:
         type: integer
     type: object
   models.GetListCategoryResponse:
     properties:
-      categorys:
+      categories:
         items:
-          $ref: '#/definitions/models.Category'
+          $ref: '#/definitions/models.UpdateCategory'
         type: array
       count:
         type: integer
     type: object
-  models.UpdateBookId:
+  models.UpdateBook:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  models.UpdateBookSwag:
     properties:
       description:
         type: string
@@ -76,7 +121,14 @@ definitions:
       price:
         type: number
     type: object
-  models.UpdateCategoryId:
+  models.UpdateCategory:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.UpdateCategorySwag:
     properties:
       name:
         type: string
@@ -222,7 +274,7 @@ paths:
         name: book
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateBookId'
+          $ref: '#/definitions/models.UpdateBookSwag'
       produces:
       - application/json
       responses:
@@ -379,7 +431,7 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateCategoryId'
+          $ref: '#/definitions/models.UpdateCategorySwag'
       produces:
       - application/json
       responses:

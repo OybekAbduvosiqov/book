@@ -182,7 +182,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateBookId"
+                            "$ref": "#/definitions/models.UpdateBookSwag"
                         }
                     }
                 ],
@@ -417,7 +417,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateCategoryId"
+                            "$ref": "#/definitions/models.UpdateCategorySwag"
                         }
                     }
                 ],
@@ -491,6 +491,12 @@ const docTemplate = `{
         "models.Book": {
             "type": "object",
             "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Category1"
+                    }
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -514,6 +520,12 @@ const docTemplate = `{
         "models.Category": {
             "type": "object",
             "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CategoryBook"
+                    }
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -528,13 +540,33 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateBook": {
+        "models.Category1": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CategoryBook": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
                 "description": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "name": {
@@ -548,16 +580,36 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateCategory": {
+        "models.CreateBook": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "updated_at": {
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.CreateCategory": {
+            "type": "object",
+            "properties": {
+                "books_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -571,7 +623,7 @@ const docTemplate = `{
                 "books": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Book"
+                        "$ref": "#/definitions/models.UpdateBook"
                     }
                 },
                 "count": {
@@ -582,10 +634,10 @@ const docTemplate = `{
         "models.GetListCategoryResponse": {
             "type": "object",
             "properties": {
-                "categorys": {
+                "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Category"
+                        "$ref": "#/definitions/models.UpdateCategory"
                     }
                 },
                 "count": {
@@ -593,7 +645,24 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpdateBookId": {
+        "models.UpdateBook": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.UpdateBookSwag": {
             "type": "object",
             "properties": {
                 "description": {
@@ -607,7 +676,18 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpdateCategoryId": {
+        "models.UpdateCategory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateCategorySwag": {
             "type": "object",
             "properties": {
                 "name": {

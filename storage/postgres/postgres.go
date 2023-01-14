@@ -12,7 +12,7 @@ import (
 
 type Store struct {
 	db       *pgxpool.Pool
-	book     *bookRepo
+	book     *BookRepo
 	category *categoryRepo
 }
 

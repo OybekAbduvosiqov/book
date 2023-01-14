@@ -11,17 +11,17 @@ import (
 	"github.com/lib/pq"
 )
 
-type bookRepo struct {
+type BookRepo struct {
 	db *pgxpool.Pool
 }
 
-func NewBookRepo(db *pgxpool.Pool) *bookRepo {
-	return &bookRepo{
+func NewBookRepo(db *pgxpool.Pool) *BookRepo {
+	return &BookRepo{
 		db: db,
 	}
 }
 
-func (r *bookRepo) Insert(ctx context.Context, req *models.CreateBook) (string, error) {
+func (r *BookRepo) Insert(ctx context.Context, req *models.CreateBook) (string, error) {
 
 	var (
 		id = uuid.New().String()
@@ -72,7 +72,7 @@ func (r *bookRepo) Insert(ctx context.Context, req *models.CreateBook) (string, 
 	return id, nil
 }
 
-func (r *bookRepo) GetByID(ctx context.Context, req *models.BookPrimeryKey) (*models.Book, error) {
+func (r *BookRepo) GetByID(ctx context.Context, req *models.BookPrimeryKey) (*models.Book, error) {
 
 	query := `
 		SELECT
@@ -176,7 +176,7 @@ func (r *bookRepo) GetByID(ctx context.Context, req *models.BookPrimeryKey) (*mo
 
 	return book, nil
 }
-func (r *bookRepo) GetList(ctx context.Context, req *models.GetListBookRequest) (*models.GetListBookResponse, error) {
+func (r *BookRepo) GetList(ctx context.Context, req *models.GetListBookRequest) (*models.GetListBookResponse, error) {
 
 	var (
 		resp   models.GetListBookResponse
@@ -230,7 +230,7 @@ func (r *bookRepo) GetList(ctx context.Context, req *models.GetListBookRequest) 
 	return &resp, nil
 }
 
-func (r *bookRepo) Update(ctx context.Context, book *models.UpdateBook) error {
+func (r *BookRepo) Update(ctx context.Context, book *models.UpdateBook) error {
 	query := `
 		UPDATE 
 			books 
@@ -256,7 +256,7 @@ func (r *bookRepo) Update(ctx context.Context, book *models.UpdateBook) error {
 	return nil
 }
 
-func (r *bookRepo) Delete(ctx context.Context, req *models.BookPrimeryKey) error {
+func (r *BookRepo) Delete(ctx context.Context, req *models.BookPrimeryKey) error {
 	_, err := r.db.Exec(ctx, "DELETE FROM book_category WHERE books_id  = $1 ", req.Id)
 	if err != nil {
 		return err

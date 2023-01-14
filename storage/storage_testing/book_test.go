@@ -107,13 +107,13 @@ func TestUpdate(t *testing.T) {
 
 	tests := []struct {
 		Name    string
-		Input   *models.BookPrimeryKey
+		Input   *models.UpdateBook
 		Output  *models.Book
 		WantErr bool
 	}{
 		{
 			Name: "case 1",
-			Input: &models.BookPrimeryKey{
+			Input: &models.UpdateBook{
 				Id: "9ef1a045-1e2a-41f5-8c5d-43f9a23d7cfd",
 			},
 			Output: &models.Book{
@@ -129,7 +129,7 @@ func TestUpdate(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
 
-			got, err := BookRepo.Update(context.Background())
+			err := BookRepo.Update(context.Background(), tc.Input)
 			if err != nil {
 				t.Errorf("%s: expected: %v, got: %v", tc.Name, tc.WantErr, err)
 				return
@@ -142,7 +142,7 @@ func TestUpdate(t *testing.T) {
 					x.UpdatedAt == y.UpdatedAt
 			})
 
-			if diff := cmp.Diff(tc.Output, got, comparer); diff != "" {
+			if diff := cmp.Diff(tc.Output, comparer); diff != "" {
 				t.Error(diff)
 				return
 			}
@@ -169,7 +169,7 @@ func TestDelete(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
 
-			got, err := BookRepo.Delete(context.Background())
+			err := BookRepo.Delete(context.Background(), tc.Input)
 			if err != nil {
 				t.Errorf("%s: expected: %v, got: %v", tc.Name, tc.WantErr, err)
 				return

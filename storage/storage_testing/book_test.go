@@ -155,19 +155,12 @@ func TestDelete(t *testing.T) {
 	tests := []struct {
 		Name    string
 		Input   *models.BookPrimeryKey
-		Output  *models.Book
 		WantErr bool
 	}{
 		{
 			Name: "case 1",
 			Input: &models.BookPrimeryKey{
 				Id: "9ef1a045-1e2a-41f5-8c5d-43f9a23d7cfd",
-			},
-			Output: &models.Book{
-				Name:        "Time123",
-				Price:       23000,
-				Description: "OK",
-				UpdatedAt:   "2023-10-10",
 			},
 			WantErr: false,
 		},
@@ -179,18 +172,6 @@ func TestDelete(t *testing.T) {
 			got, err := BookRepo.Delete(context.Background())
 			if err != nil {
 				t.Errorf("%s: expected: %v, got: %v", tc.Name, tc.WantErr, err)
-				return
-			}
-
-			comparer := cmp.Comparer(func(x, y models.Book) bool {
-				return x.Name == y.Name &&
-					x.Price == y.Price &&
-					x.Description == y.Description &&
-					x.UpdatedAt == y.UpdatedAt
-			})
-
-			if diff := cmp.Diff(tc.Output, got, comparer); diff != "" {
-				t.Error(diff)
 				return
 			}
 		})

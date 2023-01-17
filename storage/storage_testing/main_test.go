@@ -6,16 +6,19 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/OybekAbduvosiqov/book/config"
 	"github.com/OybekAbduvosiqov/book/storage/postgres"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 var (
-	BookRepo *postgres.BookRepo
+	BookRepo     *postgres.BookRepo
+	categoryRepo *postgres.CategoryRepo
 )
 
 func TestMain(m *testing.M) {
+
 	cfg := config.Load()
 
 	config, err := pgxpool.ParseConfig(fmt.Sprintf(

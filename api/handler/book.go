@@ -157,14 +157,14 @@ func (h *Handler) UpdateBook(c *gin.Context) {
 		book models.UpdateBook
 	)
 
-	book.Id = c.Param("id")
-
 	err := c.ShouldBindJSON(&book)
 	if err != nil {
 		log.Printf("error whiling update: %v\n", err)
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	book.Id = c.Param("id")
 
 	err = h.storage.Book().Update(context.Background(), &models.UpdateBook{
 		Id:          book.Id,
@@ -208,7 +208,7 @@ func (h *Handler) UpdateBook(c *gin.Context) {
 func (h *Handler) DeleteBook(c *gin.Context) {
 	id := c.Param("id")
 
-	err := h.storage.Category().Delete(context.Background(), &models.CategoryPrimeryKey{Id: id})
+	err := h.storage.Book().Delete(context.Background(), &models.BookPrimeryKey{Id: id})
 	if err != nil {
 		log.Println("error whiling delete  book:", err.Error())
 		c.JSON(http.StatusNoContent, err.Error())

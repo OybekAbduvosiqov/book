@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/OybekAbduvosiqov/book/models"
 
 	"github.com/google/uuid"
@@ -244,11 +245,24 @@ func (r *CategoryRepo) Update(ctx context.Context, Category *models.UpdateCatego
 }
 
 func (r *CategoryRepo) Delete(ctx context.Context, req *models.CategoryPrimeryKey) error {
-	_, err := r.db.Exec(ctx, "DELETE FROM book_category WHERE category_id  = $1 ", req.Id)
+
+	var (
+		count int
+	)
+
+	err := r.db.QueryRow(ctx, "SELECT COUNT(*) FROM book_category WHERE books_id = $1", req.Id).Scan(&count)
 	if err != nil {
 		return err
 	}
-	_, err = r.db.Exec(ctx, "DELETE FROM Category WHERE id = $1 ", req.Id)
+
+	if count > 0 {
+		_, err := r.db.Exec(ctx, "DELETE FROM book_category WHERE category_id  = $1 ", req.Id)
+		if err != nil {
+			return err
+		}
+
+	}
+	_, err = r.db.Exec(ctx, "DELETE FROM category WHERE id = $1", req.Id)
 
 	if err != nil {
 		return err
